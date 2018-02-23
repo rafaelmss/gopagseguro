@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="br">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>PagSeguro Project</title>
+
+    <script type="text/javascript"
+            src="https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.lightbox.js">
+    </script>
+
+    <script>
+
+        function enviaPagseguro(){
+
+            const params = {
+                name: "NAME",
+                completed: true
+            }
+
+            const http = new XMLHttpRequest();
+            http.open('POST', '/pagseguro/transaction', true);
+            http.setRequestHeader('Content-type', 'application/json');
+            http.send(JSON.stringify(params)); // Make sure to stringify
+            http.onload = function() {
+
+                var resp = http.responseText;
+                var data = JSON.parse(resp);
+
+                console.log(data);
+
+                if (data.completed) {
+                    var isOpenLightbox = PagSeguroLightbox({
+                        code: data.key
+                    }, {
+                        success: function (transactionCode) {
+                            alert("success - " + transactionCode);
+                        },
+                        abort: function () {
+                            alert("abort");
+                        }
+                    });
+
+                    // Redirecionando o cliente caso o navegador não tenha suporte ao Lightbox
+                    if (!isOpenLightbox) {
+                        location.href = "https://sandbox.pagseguro.uol.com.br/v2/checkout/payment.html?code=" + data.key;
+                    }
+                }
+            }
+        }
+
+    </script>
+
+</head>
+<body>
+
+    <div>
+        <h1>Produto de teste</h1>
+        <p> 299,00</p>
+        <button onclick="enviaPagseguro()">Comprar</button>
+    </div>
+
+
+</body>
+</html>
